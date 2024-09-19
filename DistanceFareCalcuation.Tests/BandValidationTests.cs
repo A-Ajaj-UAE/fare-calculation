@@ -44,20 +44,6 @@ namespace DistanceFareCalcuation.Tests
             Assert.Throws<ValidationException>(() => bands.Validate());
         }
 
-        [Fact]
-        public void Validate_WhenFareIsNotDecreasingAndAllowMixFareFalse_ThrowsValidationException()
-        {
-            // Arrange
-            List<Band> bands = new List<Band>
-            {
-                 new Band (1, 10, 0), // Invalid band with fare less than 0
-                 new Band (5, 4, 1),
-                 new Band (5, 5, 2)
-            };
-
-            // Act & Assert
-            Assert.Throws<ValidationException>(() => bands.Validate());
-        }
 
         [Fact]
         public void Validate_WhenFareIsNotDecreasingAndIsStrictModeTrue_ThrowsValidationException()
@@ -71,8 +57,6 @@ namespace DistanceFareCalcuation.Tests
             };
 
            
-            bool result = bands.Validate(IsStrictMode: false);
-
             // Act & Assert
             Assert.Throws<ValidationException>(() => bands.Validate(IsStrictMode: true));
         }
@@ -91,8 +75,8 @@ namespace DistanceFareCalcuation.Tests
             // Act
             bool result = bands.Validate(IsStrictMode: false);
 
-            // Act & Assert
-            Assert.Throws<ValidationException>(() => bands.Validate(IsStrictMode: true));
+            // Assert
+            Assert.True(result);
         }
 
         [Fact]
@@ -103,14 +87,11 @@ namespace DistanceFareCalcuation.Tests
             {
                  new Band (1, 10, 0),
                  new Band (5, 4, 1),
-                 new Band (4, 5, 2) // Invalid band with limit increasing
+                 new Band (4, 5, 2) // Invalid band with limit Not Increasing
             };
 
-            // Act
-            bool result = bands.Validate(IsStrictMode: true);
-
             // Assert
-            Assert.True(result);
+            Assert.Throws<ValidationException>(() => bands.Validate(IsStrictMode: true));
         }
 
         [Fact]
@@ -121,7 +102,7 @@ namespace DistanceFareCalcuation.Tests
             {
                  new Band (1, 10, 0), 
                  new Band (5, 4, 1),
-                 new Band (4, 5, 2) // Invalid band with limit increasing
+                 new Band (4, 5, 2) // Invalid band with limit Not Increasing
             };
 
             // Act

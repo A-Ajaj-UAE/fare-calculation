@@ -9,7 +9,17 @@ namespace DistanceFareCalcuation.App.DistanceFareCalcuation.app
         static void Main(string[] args)
         {
             var bands = GetBands();
+
+            Console.WriteLine($"Band Info:");
+            foreach (var band in bands)
+            {
+                Console.WriteLine($"Limit: {band.Limit}, Fare: {band.Fare}, Order: {band.Order}");
+            }
+            Console.WriteLine("");
+
             var defaultFare = GetDefaultFare();
+            Console.WriteLine($"Default Rate: {defaultFare}");
+            Console.WriteLine("");
 
             Console.WriteLine("Validation Started...");
             var isValid = Validate(bands, defaultFare);
@@ -34,6 +44,7 @@ namespace DistanceFareCalcuation.App.DistanceFareCalcuation.app
             Console.ReadKey();
         }
 
+        //Validate the required inputs
         private static bool Validate(List<Band> bands, decimal defaultFare)
         {
             try
@@ -53,6 +64,10 @@ namespace DistanceFareCalcuation.App.DistanceFareCalcuation.app
            
         }
 
+        /// <summary>
+        /// Get list of bands from repository 
+        /// </summary>
+        /// <returns></returns>
         private static List<Band> GetBands()
         {
             return new List<Band>()
@@ -60,9 +75,13 @@ namespace DistanceFareCalcuation.App.DistanceFareCalcuation.app
                 new Band(1, 10m, 0),      // From 0 to 1 mile: 10.00 GBP
                 new Band(5, 2m, 1),       // From next 5 miles: 2.00 GBP per mile
                 new Band(10, 3m, 2),      // From next 10 miles: 3.00 GBP per mile
-            };
+            }.OrderBy(b=> b.Order).ToList();
         }
 
+        /// <summary>
+        /// Getting the default fare for the calculation
+        /// </summary>
+        /// <returns></returns>
         private static decimal GetDefaultFare()
         {
             return 1m;

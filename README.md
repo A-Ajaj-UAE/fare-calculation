@@ -8,26 +8,25 @@ The requirements discuss the concept of multiple fare bands but do not specify h
 
 There’s also a logical inconsistency where the cost drops for miles 2-6 by rate 2, increases for the next 10 miles by rate 3, and then decreases again, which could be a business requirement or an error in the document.
 
+Same for Limits, logicly it should increased
+
 # For this implementation:
 
-I’ve made assumptions and created a solution that allows gaps between bands, with gap validation as an optional feature.
+I’ve made assumptions and created a solution that allow dynamic change on the bands, also add a separte property for default Fare.
 
-I’ve intentionally ignored the logical error for now to be discussed further as a potential business requirement.
+I have added IsStrictMode to throw exceptions for logical inconsistency if its enabled and display warning if it disabled
 
 
 # Data Structure for Fare Bands
-The solution is built with a flexible data structure, ideal for accommodating future rules or conditions, such as geolocation or class-based fares.
+The solution is built with a flexible data structure, ideal for easy of usage and configure with dynamic abbility to change
 
 # Band Attributes:
-mileFrom (int): Starting mile of the band.
+Limit (int): how many miles that apply.
 
-mileTo (int): Ending mile of the band.
+Fare (decimal): The amount to pay for each mile within the limit.
 
-rate (decimal): The amount to pay for each mile within the specified range.
+Order (int): Determines excution order of bands .
 
-isBaseRate (bool): Determines whether this band provides the base rate for the miles.
-
-This structure can be expanded in the future to include other attributes, like geolocation or different passenger classes.
 
 # Solution Architecture
 The project is kept simple and consists of two core parts:

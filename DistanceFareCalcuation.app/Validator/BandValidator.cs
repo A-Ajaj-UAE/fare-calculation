@@ -1,4 +1,5 @@
 ﻿using DistanceFareCalcuation.App.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace DistanceFareCalcuation.App.Validator
 {
@@ -8,53 +9,61 @@ namespace DistanceFareCalcuation.App.Validator
         /// Validate set of bands to be applied to a fare calculation, when allow gap is used the base fare will be calculated
         /// </summary>
         /// <param name="bands">list of bands to validate</param>
-        /// <param name="allowGaps"> when used a based fare will be calculated</param>
+        /// <param name="allowMixedFare"> its show warning instead of error when rate is not decreaseing in order</param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public static bool Validate(this List<Band> bands, bool allowGaps = false)
+        public static bool Validate(this List<Band> bands, bool IsStrictMode = false)
         {
             try
             {
-                if (bands.Count == 0)
+                if (bands == null || bands.Count == 0)
                 {
-                    throw new InvalidOperationException("No bands to validate.");
+                    throw new ValidationException("No bands to validate.");
                 }
 
-                if (bands.Any(b => b.MileFrom == b.MileTo))
+                if (bands.Any(b=> b.Limit <= 0))
                 {
-                    throw new InvalidOperationException($"invalid band, Mile From should be less than Mile To.");
+                    throw new ValidationException($"Error: Bands limit must be gretter than 0");
                 }
 
-
-                //order the bands by mile from
-                bands = bands.OrderByDescending(b => b.IsBaseBand).ThenBy(b => b.MileFrom).ToList();
-
-                // validate only one base rate band
-                if (bands.Count == 0
-                    || bands[0].MileFrom != 0
-                    || bands.Count(b => b.IsBaseBand) != 1)
+                if (bands.Any(b => b.Fare <= 0))
                 {
-                    throw new InvalidOperationException("single rate band must start at 0 and have IsBaseRate set to true.");
+                    throw new ValidationException($"Error: Bands Fare must be gretter than 0");
                 }
 
-                //remove the base rate band
-                bands = bands.Where(b => !b.IsBaseBand).ToList();
-
-
-                // Ensure no overlaps and no gaps
+                // Ensure no price order more expensive than remaining
                 for (int i = 0; i < bands.Count - 1; i++)
                 {
                     var band = bands[i];
                     var nextBand = bands[i + 1];
 
-                    if (band.MileTo > nextBand.MileFrom)
+                    if (band.Fare < nextBand.Fare)
                     {
-                        throw new InvalidOperationException($"Band {band.MileFrom} to {band.MileTo} overlaps with band {nextBand.MileFrom} to {nextBand.MileTo}");
+                        if (IsStrictMode)
+                        {
+                            throw new ValidationException($"Error: Band with rate {band.Fare} and limit {band.Limit} is less than band with rate {nextBand.Fare} and limit  {nextBand.Fare}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Warning: Band with rate {band.Fare} and limit {band.Limit} is less than band with rate {nextBand.Fare} and limit  {nextBand.Fare}");
+                        }
                     }
 
-                    if (!allowGaps && band.MileTo < nextBand.MileFrom)
+                    if (band.Limit > nextBand.Limit)
                     {
-                        throw new InvalidOperationException($"Band {band.MileFrom} to {band.MileTo} has a gap with band {nextBand.MileFrom} to {nextBand.MileTo}");
+                        if (IsStrictMode)
+                        {
+                            throw new ValidationException($"Error: Band limit {band.Limit} with rate {band.Fare} is gretter than band with limit {nextBand.Limit} with rate {nextBand.Fare}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Warning: Band limit {band.Limit} with rate {band.Fare} is gretter than band with limit {nextBand.Limit} with rate {nextBand.Fare}");
+                        }
+                    }
+
+                    if (band.Fare == nextBand.Fare && band.Limit == nextBand.Limit)
+                    {
+                        Console.WriteLine($"Warning: Band limit {band.Limit} with rate {band.Fare} is equal to band {nextBand.Limit} with rate {nextBand.Fare}");
                     }
                 }
 

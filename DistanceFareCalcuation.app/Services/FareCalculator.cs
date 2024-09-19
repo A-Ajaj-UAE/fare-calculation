@@ -5,10 +5,12 @@ namespace DistanceFareCalcuation.App.Services
     public class FareCalculator
     {
         private List<Band> Bands { get; }
+        private decimal DefaultFare {  get; }   
 
-        public FareCalculator(List<Band> bands)
+        public FareCalculator(List<Band> bands, decimal defaultFare)
         {
             Bands = bands;
+            DefaultFare = defaultFare;
         }
 
         /// <summary>
@@ -19,55 +21,51 @@ namespace DistanceFareCalcuation.App.Services
         {
             Console.WriteLine($"Starting fare calculation for {dictance} miles rounded to {(int)Math.Ceiling(dictance)}...");
 
+            var remainingMiles = dictance;
+            decimal totalFare = 0m;
+
             dictance = Math.Ceiling(dictance);
 
-            if (Bands == null)
+            if (Bands == null || Bands.Count == 0)
             {
                 throw new ArgumentException("Bands not found, rate cannot be calcuated");
             }
 
-            if (dictance < 0)
+            if (dictance <= 0)
             {
                 throw new ArgumentException("Miles driven cannot be negative");
             }
 
-            decimal totalFare = 0;
-            decimal totalCoveredDistance = 0;
-
-
-            var baseRate = Bands.Single(b => b.IsBaseBand);
-
-            foreach (var band in Bands)
+            if (DefaultFare <= 0)
             {
-
-                if (dictance <= band.MileFrom)
-                    continue;
-
-                if (band.IsBaseBand)
-                {
-                    continue;
-                }
-                else
-                {
-                    decimal milesInThisBand = Math.Min(dictance, band.MileTo) - band.MileFrom;
-
-                    totalFare += milesInThisBand * band.Rate;
-                    totalCoveredDistance += milesInThisBand;
-
-                    // Log the calculation per band
-                    Console.WriteLine($"Adding {milesInThisBand} miles at rate {band.Rate} GBP/mile, total so far: {totalFare} GBP");
-                }
+                throw new ArgumentException("defaultFare cannot be less or equal zero");
             }
 
-            totalFare += ((dictance - totalCoveredDistance) * baseRate.Rate);
-            Console.WriteLine($"Adding remaining miles {(dictance - totalCoveredDistance)} at base rate {baseRate.Rate} GBP/mile, total so far: {totalFare} GBP");
+            // order based on admin prefrences
+            var orderedBands = Bands.OrderBy(b => b.Order).ToList();
 
+            foreach (var band in orderedBands)
+            {
+                if (remainingMiles <= 0)
+                    break;
+
+                var milesInThisBand = Math.Min(remainingMiles, band.Limit);
+                totalFare += milesInThisBand * band.Fare;
+                remainingMiles -= milesInThisBand;
+
+                Console.WriteLine($"Adding {milesInThisBand} miles at rate {band.Fare} GBP/mile, total so far: {totalFare} GBP");
+            }
+
+            if (remainingMiles > 0)
+            {
+                totalFare += remainingMiles * DefaultFare;
+
+                Console.WriteLine($"Adding {remainingMiles} miles at rate {DefaultFare} GBP/mile, total so far: {totalFare} GBP");
+            }
 
             Console.WriteLine($"Total fare for {dictance} miles: {totalFare} GBP");
 
-
             Console.WriteLine($"-------------------------------------------------------------");
-
 
             return totalFare;
         }

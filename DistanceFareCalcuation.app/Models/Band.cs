@@ -2,36 +2,15 @@
 {
     public class Band
     {
-        public Band()
+        public Band(int limit, decimal rate, int order)
         {
-
-        }
-        public Band(int MileFrom, int MileTo, decimal Rate, bool IsBaseRate = false)
-        {
-            this.MileFrom = MileFrom;
-
-            this.MileTo = MileTo;
-
-            this.Rate = Rate;
-
-            this.IsBaseBand = IsBaseRate;
+            Limit = limit;
+            Fare = rate;
+            Order = order;
         }
 
-        /// <summary>
-        /// Mile From
-        /// </summary>
-        public int MileFrom { get; set; }
-        /// <summary>
-        /// Mile To
-        /// </summary>
-        public int MileTo { get; set; }
-        /// <summary>
-        /// Rate per mile
-        /// </summary>
-        public decimal Rate { get; set; }
-        /// <summary>
-        /// IsBaseBand determin a band having a default rate for mile
-        /// </summary>
-        public bool IsBaseBand { get; set; }
+        public int Limit { get; set; }  // The maximum number of miles for this rate band
+        public decimal Fare { get; set; } // The fare per mile for this band
+        public int Order { get; set; }
     }
 }

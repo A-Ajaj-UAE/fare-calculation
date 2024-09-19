@@ -9,12 +9,16 @@ namespace DistanceFareCalcuation.App.DistanceFareCalcuation.app
         static void Main(string[] args)
         {
             var bands = GetBands();
+            var defaultFare = GetDefaultFare();
 
-            var isValid = ValidateBands(bands);
+            Console.WriteLine("Validation Started...");
+            var isValid = Validate(bands, defaultFare);
+            Console.WriteLine("Validation completed...");
+            Console.WriteLine("");
 
             if (isValid)
             {
-                var calculator = new FareCalculator(bands);
+                var calculator = new FareCalculator(bands, defaultFare);
 
                 // Test task scenarios
                 calculator.Calculate(6m);
@@ -30,23 +34,38 @@ namespace DistanceFareCalcuation.App.DistanceFareCalcuation.app
             Console.ReadKey();
         }
 
-        private static bool ValidateBands(List<Band> bands)
+        private static bool Validate(List<Band> bands, decimal defaultFare)
         {
-            return bands.Validate();
+            try
+            {
+                if (defaultFare <= 0)
+                {
+                    Console.WriteLine("Error: Default Fare should be gretter than 0");
+                    return false;
+                }
+
+                return bands.Validate(IsStrictMode: false);
+            }
+            catch 
+            {
+                return false;
+            }
+           
         }
 
         private static List<Band> GetBands()
         {
-            //Define bands with start and end points
             return new List<Band>()
             {
-                new Band(0, 1, 10m),      // From 0 to 1 mile: 10.00 GBP
-                new Band(1, 6, 2m),       // From 1 to 6 miles: 2.00 GBP per mile
-                new Band(6, 16, 3m),      // From 6 to 16 miles: 3.00 GBP per mile
-                new Band(0, int.MaxValue, 1m, true) // From 16 miles onward: 1.00 GBP per mile
-            }
-            .OrderByDescending(b => b.IsBaseBand)
-            .ThenBy(b => b.MileFrom).ToList();
+                new Band(1, 10m, 0),      // From 0 to 1 mile: 10.00 GBP
+                new Band(5, 2m, 1),       // From next 5 miles: 2.00 GBP per mile
+                new Band(10, 3m, 2),      // From next 10 miles: 3.00 GBP per mile
+            };
+        }
+
+        private static decimal GetDefaultFare()
+        {
+            return 1m;
         }
 
     }

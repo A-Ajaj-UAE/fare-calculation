@@ -31,10 +31,9 @@ namespace DistanceFareCalcuation.App.Validator
 
                 // validate only one base rate band
                 if (bands.Count == 0
-                    || bands[0].MileFrom != 0
                     || bands.Count(b => b.IsBaseBand) != 1)
                 {
-                    throw new InvalidOperationException("single rate band must start at 0 and have IsBaseRate set to true.");
+                    throw new InvalidOperationException("single rate band have IsBaseRate set to true.");
                 }
 
                 //remove the base rate band
